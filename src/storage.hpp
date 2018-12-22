@@ -1,5 +1,5 @@
-#ifndef BLABBER_DATABASE_HPP
-#define BLABBER_DATABASE_HPP
+#ifndef BLABBER_STORAGE_HPP
+#define BLABBER_STORAGE_HPP
 
 #include "common.hpp"
 #include "fixed_string.hpp"
@@ -58,8 +58,8 @@ struct post {
 
     // Defines the binary layout. Must list all members once.
     static constexpr auto get_binary_format() {
-        return prequel::binary_format(&post::id, &post::created_at, &post::title, &post::content,
-                                      &post::comments);
+        return prequel::binary_format(&post::id, &post::created_at, &post::user, &post::title,
+                                      &post::content, &post::comments);
     }
 };
 
@@ -112,7 +112,7 @@ struct post_result {
     std::vector<comment_entry> comments;
 };
 
-class database {
+class storage {
     /*
      * Stores posts and indexes them by their id.
      */
@@ -138,15 +138,18 @@ public:
         prequel::heap::anchor strings;
 
         static constexpr auto get_binary_format() {
-            return prequel::binary_format(&anchor::next_post_id, &anchor::posts);
+            return prequel::binary_format(&anchor::next_post_id, &anchor::posts, &anchor::strings);
         }
 
-        friend database;
+        friend storage;
         friend prequel::binary_format_access;
     };
 
 public:
-    explicit database(prequel::anchor_handle<anchor> anchor_, prequel::allocator& alloc_);
+    explicit storage(prequel::anchor_handle<anchor> anchor_, prequel::allocator& alloc_);
+
+    prequel::engine& get_engine() const { return m_alloc->get_engine(); }
+    prequel::allocator& get_allocator() const { return *m_alloc; }
 
     u64 create_post(const std::string& user, const std::string& title, const std::string& content);
 
@@ -155,6 +158,8 @@ public:
     frontpage_result fetch_frontpage(size_t max_posts) const;
 
     post_result fetch_post(u64 post_id, size_t max_comments) const;
+
+    void dump(std::ostream& os);
 
 private:
     prequel::anchor_handle<anchor> m_anchor;
@@ -165,4 +170,4 @@ private:
 
 } // namespace blabber
 
-#endif // BLABBER_DATABASE_HPP
+#endif // BLABBER_STORAGE_HPP

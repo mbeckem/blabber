@@ -41,4 +41,9 @@ if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 endif()
 
+include_directories(SYSTEM "deps/pybind11/include")
+
+find_package(PythonLibs REQUIRED)
+include_directories(SYSTEM "${PYTHON_INCLUDE_DIRS}")
+
 add_subdirectory(src)

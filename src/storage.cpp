@@ -1,4 +1,6 @@
-#include "database.hpp"
+#include "storage.hpp"
+
+#include <fmt/ostream.h>
 
 #include <algorithm>
 #include <ctime>
@@ -68,13 +70,13 @@ static u64 current_timestamp() {
     return static_cast<u64>(t);
 }
 
-database::database(prequel::anchor_handle<anchor> anchor_, prequel::allocator& alloc_)
+storage::storage(prequel::anchor_handle<anchor> anchor_, prequel::allocator& alloc_)
     : m_anchor(std::move(anchor_))
     , m_alloc(&alloc_)
     , m_posts(m_anchor.member<&anchor::posts>(), alloc_)
     , m_strings(m_anchor.member<&anchor::strings>(), alloc_) {}
 
-u64 database::create_post(const std::string& user, const std::string& title,
+u64 storage::create_post(const std::string& user, const std::string& title,
                          const std::string& content) {
     const u64 id = m_anchor.get<&anchor::next_post_id>();
     if (id == 0) { // id wrap around, practially impossible
@@ -93,7 +95,7 @@ u64 database::create_post(const std::string& user, const std::string& title,
     return id;
 }
 
-void database::create_comment(u64 post_id, const std::string& user, const std::string& content) {
+void storage::create_comment(u64 post_id, const std::string& user, const std::string& content) {
     // First, find the post. Then insert the new comment into the list.
     auto post_cursor = m_posts.find(post_id);
     if (!post_cursor) {
@@ -122,7 +124,7 @@ void database::create_comment(u64 post_id, const std::string& user, const std::s
     }
 }
 
-frontpage_result database::fetch_frontpage(size_t max_posts) const {
+frontpage_result storage::fetch_frontpage(size_t max_posts) const {
     std::vector<post> found_posts;
     {
         // Iterate from the end, in reverse order.
@@ -147,7 +149,7 @@ frontpage_result database::fetch_frontpage(size_t max_posts) const {
     return result;
 }
 
-post_result database::fetch_post(u64 post_id, size_t max_comments) const {
+post_result storage::fetch_post(u64 post_id, size_t max_comments) const {
     // First, find the post. Then insert the new comment into the list.
     auto post_cursor = m_posts.find(post_id);
     if (!post_cursor) {
@@ -201,6 +203,15 @@ post_result database::fetch_post(u64 post_id, size_t max_comments) const {
         result.comments.push_back(std::move(entry));
     }
     return result;
+}
+
+void storage::dump(std::ostream& os) {
+    fmt::print(os, "Post-Tree state:\n");
+    m_posts.raw().dump(os);
+
+    fmt::print(os, "\n\n");
+    fmt::print(os, "String storage state:\n");
+    m_strings.dump(os);
 }
 
 } // namespace blabber

@@ -1,10 +1,9 @@
 set(SOURCES
     main.cpp
+    storage.cpp
 
     common.hpp
-    database.hpp
-
-    database.cpp
+    storage.hpp
 )
 
 add_executable(blabber ${SOURCES})
