@@ -1,3 +1,7 @@
 [submodule "prequel"]
 	path = deps/prequel
 	url = https://github.com/mbeckem/prequel.git
+[submodule "pybind11"]
+	path = deps/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
