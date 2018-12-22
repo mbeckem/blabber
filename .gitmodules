@@ -1,0 +1,3 @@
+[submodule "prequel"]
+	path = deps/prequel
+	url = https://github.com/mbeckem/prequel.git
