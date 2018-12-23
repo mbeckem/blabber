@@ -5,3 +5,6 @@
 	path = deps/pybind11
 	url = https://github.com/pybind/pybind11.git
 	branch = stable
+[submodule "fmt"]
+	path = deps/fmt
+	url = https://github.com/fmtlib/fmt.git

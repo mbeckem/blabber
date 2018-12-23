@@ -1,49 +1,19 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(blabber)
 
-# CMake subprojects before we modify our own global flags, so the subprojects
-# don't inherit them.
+# Set all symbols to "hidden" by default - this allows us to omit them in the final
+# shared library that we will import from python. This reduces bloat in larger applications.
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+
+# Needed because we're about to produce a .so (or equivalent) for our python module.
+set(CMAKE_POSITION_INDEPENDENT_CODE 1)
+
+add_subdirectory(deps/fmt)
 add_subdirectory(deps/prequel)
 
-set(GCC_WARNINGS
-    -Wall
-    -Wextra
-    -pedantic
-
-    # Disabled warnings
-    -Wno-unknown-warning-option
-    -Wno-noexcept-type
-    -Wno-terminate
-    -Wno-exceptions
-
-    -Wshadow
-    -Wnon-virtual-dtor
-    -Wcast-align
-    -Wunused
-    -Wpedantic
-    -Wsign-conversion
-    -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wduplicated-branches
-    -Wlogical-op
-    -Wnull-dereference
-    -Wdouble-promotion
-    -Wformat=2
-#    -Wlifetime # Recent clang only
-)
-
-if ((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-    string(REPLACE ";" " " GCC_WARNINGS_STR "${GCC_WARNINGS}")
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 ${GCC_WARNINGS_STR}")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
-endif()
-
-include_directories(SYSTEM "deps/pybind11/include")
-
-find_package(PythonLibs REQUIRED)
-include_directories(SYSTEM "${PYTHON_INCLUDE_DIRS}")
+set(PYBIND11_CPP_STANDARD -std=c++17)
+add_subdirectory(deps/pybind11)
 
 add_subdirectory(src)

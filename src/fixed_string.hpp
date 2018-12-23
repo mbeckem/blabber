@@ -12,7 +12,9 @@
 namespace blabber {
 
 /*
- * A fixed string of maximum size N.
+ * A fixed string of maximum size N. Strings are either terminated by NULs
+ * or take up the entire array. In other words, when the string size is less
+ * than `N`, then the remaining characters in the internal array are all 0.
  *
  * TODO: Move this into the main prequel project. It's useful.
  */
