@@ -133,7 +133,6 @@ frontpage_result storage::fetch_frontpage(size_t max_posts) const {
             found_posts.push_back(tree_cursor.get());
             tree_cursor.move_prev();
         }
-        std::reverse(found_posts.begin(), found_posts.end());
     }
 
     frontpage_result result;
@@ -169,7 +168,6 @@ post_result storage::fetch_post(u64 post_id, size_t max_comments) const {
             found_comments.push_back(cursor.get());
             cursor.move_prev();
         }
-        std::reverse(found_comments.begin(), found_comments.end());
     }
 
     if (post_changed) {

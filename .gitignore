@@ -1,0 +1,7 @@
+venv/
+
+*.pyc
+*.so
+
+blabber.db
+blabber.db-journal

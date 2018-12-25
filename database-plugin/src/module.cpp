@@ -33,10 +33,15 @@ public:
         });
     }
 
-    void create_comment(u64 post_id, const std::string& user, const std::string& content) {
-        return exec([&]{
-            return m_db.create_comment(post_id, user, content);
-        });
+    bool create_comment(u64 post_id, const std::string& user, const std::string& content) {
+        try {
+            exec([&]{
+                return m_db.create_comment(post_id, user, content);
+            });
+            return true;
+        } catch (const not_found_error&) {
+            return false;
+        }
     }
 
     py::list fetch_frontpage(size_t max_posts) {
@@ -57,10 +62,15 @@ public:
         return entries;
     }
 
-    py::dict fetch_post(u64 post_id, size_t max_comments) {
-        post_result native = exec([&]{
-            return m_db.fetch_post(post_id, max_comments);
-        });
+    py::object fetch_post(u64 post_id, size_t max_comments) {
+        post_result native;
+        try {
+            native = exec([&]{
+                return m_db.fetch_post(post_id, max_comments);
+            });
+        } catch (const not_found_error&) {
+            return py::none();
+        }
 
         py::dict post;
         post["id"] = native.id;
