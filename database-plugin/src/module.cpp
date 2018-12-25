@@ -126,5 +126,3 @@ PYBIND11_MODULE(blabber_database, m) {
             .def("finish", &py_database::finish,
                  "Perform a clean shutdown of the database.");
 }
-
-int main() {}
