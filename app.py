@@ -16,10 +16,9 @@ DATABASE_PATH = "./blabber.db"             # File path of our database file
 DATABASE_CACHE_SIZE = (10 * 2**20) // 4096; # Memory cache size (unit is blocks of 4 KiB)
 
 async def run_database(app):
-    db = blabber_database.Database(DATABASE_PATH, DATABASE_CACHE_SIZE)
-    app["db"] = db
+    app["db"] = blabber_database.Database(DATABASE_PATH, DATABASE_CACHE_SIZE)
     yield
-    db.finish()
+    app["db"].finish()
 
 class BlabberHandlers:
     def __init__(self, app):

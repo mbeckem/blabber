@@ -1,20 +1,26 @@
 #ifndef BLABBER_STORAGE_HPP
 #define BLABBER_STORAGE_HPP
 
-#include "common.hpp"
-#include "fixed_string.hpp"
-
 #include <prequel/anchor_handle.hpp>
 #include <prequel/container/btree.hpp>
 #include <prequel/container/heap.hpp>
 #include <prequel/container/list.hpp>
+#include <prequel/fixed_string.hpp>
 #include <prequel/serialization.hpp>
 
 #include <string>
 #include <variant>
 #include <vector>
 
+/*
+ * This file contains the definition of our datastructures, i.e.
+ * all user defined classes for on disk storage and the prequel container classes
+ * used to organize them.
+ */
+
 namespace blabber {
+
+using namespace prequel::short_types;
 
 class database_error : public std::runtime_error {
 public:
@@ -32,7 +38,7 @@ struct post;
 // A string is either inlined (i.e. stored directly), if its size is small enough,
 // or moved to the heap storage otherwise.
 template<u32 Capacity>
-using optimized_string = std::variant<fixed_cstring<Capacity>, prequel::heap::reference>;
+using optimized_string = std::variant<prequel::fixed_cstring<Capacity>, prequel::heap::reference>;
 
 /*
  * The format of posts stored on disk.
@@ -82,6 +88,10 @@ struct comment {
     }
 };
 
+/*
+ * The result of a frontpage query.
+ * Contains the latest posts (user, date, id and title only; content omitted).
+ */
 struct frontpage_result {
     // The part of a post displayed on the front page.
     struct post_entry {
@@ -95,6 +105,9 @@ struct frontpage_result {
     std::vector<post_entry> entries;
 };
 
+/*
+ * The result of a post query (post content and latest comments).
+ */
 struct post_result {
     struct comment_entry {
         u64 created_at = 0;

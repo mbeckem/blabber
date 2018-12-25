@@ -1,11 +1,7 @@
 set(MODULE_SOURCES
-    module.cpp
     database.cpp
     storage.cpp
 
-    common.hpp
-    database.hpp
-    fixed_string.hpp
     storage.hpp
 )
 

@@ -31,7 +31,7 @@ load_optimized_string(const prequel::heap& h, const optimized_string<Capacity>& 
 
         // Called when the string was inlined. We can get the string content
         // from the object itself.
-        std::string operator()(const fixed_cstring<Capacity>& str) const {
+        std::string operator()(const prequel::fixed_cstring<Capacity>& str) const {
             return std::string(str.begin(), str.end());
         }
 
@@ -55,7 +55,7 @@ static optimized_string<Capacity> store_optimized_string(prequel::heap& h, const
 
     // Check whether the string fits into the available optimized storage.
     if (str.size() <= Capacity) {
-        return fixed_cstring<Capacity>(str);
+        return prequel::fixed_cstring<Capacity>(str);
     }
 
     // Store long strings on the heap.
