@@ -78,6 +78,11 @@ class BlabberHandlers:
         location = request.app.router["show_post"].url_for(post_id = str(post_id))
         raise web.HTTPFound(location)
 
+    async def dump(self, request):
+        db = request.app["db"]
+        data = await self._dbop(lambda: db.dump())
+        return web.Response(text = data)
+
 
 def main():
     app = web.Application()
@@ -90,6 +95,7 @@ def main():
         web.post("/post", blabber.submit_post, name = "submit_post"),
         web.get("/post/{post_id:\d+}", blabber.show_post, name = "show_post"),
         web.post("/post/{post_id:\d+}/comment", blabber.submit_comment, name = "submit_comment"),
+        web.get("/dump", blabber.dump, name = "dump"),
     ])
     app.router.add_static("/static", path = "./static", name = "static")
     web.run_app(app)

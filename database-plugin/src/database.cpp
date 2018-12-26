@@ -366,5 +366,7 @@ PYBIND11_MODULE(blabber_database, m) {
              "Fetch the content of a post. Returns the N latest comments.", py::arg("post_id"),
              py::arg("max_comments"))
 
-        .def("finish", &database::finish, "Perform a clean shutdown of the database.");
+        .def("finish", &database::finish, "Perform a clean shutdown of the database.")
+
+        .def("dump", &database::dump, "Dump the database into a string for debugging.");
 }
