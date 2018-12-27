@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+    <a href="{{ index_location() }}">Back to Frontpage</a>
+
+    <div class="full-post">
+        <div class="header">
+            <h1>{{ post.title }}</h1>
+            <span class="user"> by {{ post.user }}</span>
+            <span class="date"> at {{ post.created_at | datetime }}</span>
+        </div>
+        
+        <p class="body">
+            {{ post.content }}
+        </p>
+        
+        <div class="comments">
+        {% for comment in post.comments %}
+            <div class="comment">
+                <div class="header">
+                    <span class="user"> by {{ comment.user }}</span>
+                    <span class="date"> at {{ comment.created_at | datetime }}</span>
+                </div>
+                
+                <p class="body">
+                    {{ comment.content }}
+                </p>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endblock %}

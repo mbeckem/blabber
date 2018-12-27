@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Frontpage{% endblock %}
+{% block content %}
+    <h1>Frontpage</h1>
+    
+    <div class="post-list">
+    {% for post in frontpage %}
+        <div class="post">
+            <a class="title" href="{{ post_location(post.id) }}">{{ post.title }}</a>
+            <span class="user"> by {{ post.user }}</span>
+            <span class="date"> at {{ post.created_at | datetime }}</span>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}
