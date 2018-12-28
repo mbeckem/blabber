@@ -3,6 +3,39 @@
 {% block content %}
     <h1>Frontpage</h1>
     
+    <div class="create-post create-entry">
+        <h2>Create a post</h2>
+
+        {% if form.errors is defined %}
+        <ul class="errors">
+            {% for error in form.errors %}
+            <li class="error-message">
+                {{ error }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form action="{{ submit_post_location() }}" method="post">
+            <div>
+                <label for="user">User:</label>
+                <input type="text" name="user" value="{{ form.user | default("") }}">
+            </div>
+            <div>
+                <label for="user">Title:</label>
+                <input type="text" name="title" value="{{ form.title | default("") }}">
+            </div>
+            <div>
+                <label for="user">Content:</label>
+                <textarea name="content">{{ form.content | default("") }}</textarea>
+            </div>
+            <div class="button">
+                <button type="submit">Create post</button>
+            </div>
+        </form>
+    </div>
+
+    <h2>Posts</h2>
     <div class="post-list">
     {% for post in frontpage %}
         <div class="post">
@@ -10,6 +43,8 @@
             <span class="user"> by {{ post.user }}</span>
             <span class="date"> at {{ post.created_at | datetime }}</span>
         </div>
+    {% else %}
+        No posts yet
     {% endfor %}
     </div>
 {% endblock %}

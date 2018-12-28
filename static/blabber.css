@@ -1,3 +1,59 @@
 body {
-    font-size: 1.2em;
+    padding: 0 10px;
+    margin: 40px auto;
+    max-width: 800px;
+
+    color: #333;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+h1, h2, h3 {
+    line-height: 1.2;
+}
+
+.create-entry form {
+    margin: 0 auto;
+    width: 440px;
+
+}
+
+.create-entry form div + div {
+    margin-top: 1em;
+}
+
+.create-entry form label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+}
+
+.create-entry form input,
+.create-entry form textarea {
+    font: 1em sans-serif;
+    width: 300px;
+
+    box-sizing: border-box;
+    border: 1px solid #999;
+}
+
+.create-entry form textarea {
+    vertical-align: top;
+    height: 10em;
+}
+
+.create-entry .button {
+    text-align: center;
+}
+
+.full-post .body,
+.comments .comment .body {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.comments .comment + .comment {
+    border-top: 1px solid #999;
+    padding-top: 1em;
 }

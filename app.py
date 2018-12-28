@@ -28,6 +28,10 @@ def format_datetime(timestamp):
     local = dt.astimezone(tz = None)
     return str(local) # TODO
 
+def newline_to_br(value):
+    result = str(jinja2.escape(value)).replace("\n", "<br>\n");
+    return jinja2.Markup(result)
+
 
 class BlabberHandlers:
     def __init__(self, app):
@@ -42,8 +46,11 @@ class BlabberHandlers:
             auto_reload = True if DEV else False,
             loader = jinja2.FileSystemLoader(os.path.join(ROOT_DIRECTORY, "templates")))
         self._jinjaenv.filters["datetime"] = format_datetime
+        self._jinjaenv.filters["newline_to_br"] = newline_to_br
         self._jinjaenv.globals.update(index_location = self._index_location,
-                                      post_location = self._post_location)
+                                      post_location = self._post_location,
+                                      submit_post_location = self._submit_post_location,
+                                      submit_comment_location = self._submit_comment_location)
 
         # Database state
         self._dbexec = concurrent.futures.ThreadPoolExecutor(max_workers = 1)
@@ -80,26 +87,62 @@ class BlabberHandlers:
     def _post_location(self, post_id):
         return self._app.router["show_post"].url_for(post_id = str(post_id))
 
-    async def index(self, request):
+    # Returns the path to the submit-post endpoint.
+    def _submit_post_location(self):
+        return self._app.router["submit_post"].url_for()
+
+    # Returns the path to the submit-comment endpoint.
+    def _submit_comment_location(self, post_id):
+        return self._app.router["submit_comment"].url_for(post_id = str(post_id))
+
+    async def _show_index_impl(self, request, existing_form):
         db = request.app["db"]
         frontpage = await self._dbop(lambda: db.fetch_frontpage(max_posts = 100))
-        return self._render_html("index.html", frontpage = frontpage)
+        form = dict()
+        return self._render_html("index.html", frontpage = frontpage, form = existing_form)
 
-    async def show_post(self, request):
+    async def _show_post_impl(self, request, post_id, existing_form):
         db = request.app["db"]
-        post_id = int(request.match_info["post_id"])
         post = await self._dbop(lambda: db.fetch_post(post_id = post_id, max_comments = 100))
 
         if post is None:
             raise web.HTTPNotFound()
-        return self._render_html("post.html", post = post)
+        return self._render_html("post.html", post = post, form = existing_form)
+
+
+    async def index(self, request):
+        return await self._show_index_impl(request, None)
+
+    async def show_post(self, request):
+        post_id = int(request.match_info["post_id"])
+        return await self._show_post_impl(request, post_id, None)
 
     async def submit_post(self, request):
         db = request.app["db"]
         data = await request.post()
-        user = data["user"]
-        title = data["title"]
-        content = data["content"]
+
+        form_errors = []
+
+        user = data["user"].strip()
+        if user == "":
+            form_errors.append("Please enter a non-empty user name.")
+
+        title = data["title"].strip()
+        if title == "":
+            form_errors.append("Please enter a non-empty post title.")
+
+        content = data["content"].strip()
+        if content == "":
+            form_errors.append("Please enter a non-empty post content.")
+
+        if form_errors:
+            form = {
+                "errors": form_errors,
+                "user": user,
+                "title": title,
+                "content": content
+            }
+            return await self._show_index_impl(request, form)
 
         post_id = await self._dbop(lambda: db.create_post(user = user, title = title, content = content))
         raise web.HTTPFound(self._post_location(post_id))
@@ -107,9 +150,25 @@ class BlabberHandlers:
     async def submit_comment(self, request):
         db = request.app["db"]
         data = await request.post()
+
+        form_errors = []
         post_id = int(request.match_info["post_id"])
-        user = data["user"]
-        content = data["content"]
+
+        user = data["user"].strip()
+        if user == "":
+            form_errors.append("Please enter a non-empty user name.")
+
+        content = data["content"].strip()
+        if content == "":
+            form_errors.append("Please enter a non-empty comment.")
+
+        if form_errors:
+            form = {
+                "errors": form_errors,
+                "user": user,
+                "content": content,
+            }
+            return await self._show_post_impl(request, post_id, form)
 
         ok = await self._dbop(lambda: db.create_comment(post_id = post_id, user = user, content = content))
         if not ok:

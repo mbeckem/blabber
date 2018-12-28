@@ -9,6 +9,9 @@ namespace blabber {
 
 // Dereference the string and load it from the heap.
 static std::string load_string(const prequel::heap& h, const prequel::heap_reference& ref) {
+    if (!ref)
+        return {};
+
     std::string loaded;
     loaded.resize(h.size(ref));
     h.load(ref, reinterpret_cast<byte*>(&loaded[0]), loaded.size());
@@ -17,6 +20,9 @@ static std::string load_string(const prequel::heap& h, const prequel::heap_refer
 
 // Stores the string on the heap and returns a reference to its location.
 static prequel::heap_reference store_string(prequel::heap& h, const std::string& str) {
+    if (str.empty())
+        return {};
+
     return h.allocate(reinterpret_cast<const byte*>(str.data()), str.size());
 }
 

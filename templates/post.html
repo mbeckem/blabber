@@ -11,22 +11,53 @@
         </div>
         
         <p class="body">
-            {{ post.content }}
+            {{ post.content | newline_to_br }}
         </p>
-        
-        <div class="comments">
-        {% for comment in post.comments %}
-            <div class="comment">
-                <div class="header">
-                    <span class="user"> by {{ comment.user }}</span>
-                    <span class="date"> at {{ comment.created_at | datetime }}</span>
-                </div>
-                
-                <p class="body">
-                    {{ comment.content }}
-                </p>
+    </div>
+
+    <div class="create-comment create-entry">
+        <h2>Submit a comment</h2>
+
+        {% if form.errors is defined %}
+        <ul class="errors">
+            {% for error in form.errors %}
+            <li class="error-message">
+                {{ error }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form action="{{ submit_comment_location(post.id) }}" method="post">
+            <div>
+                <label for="user">User:</label>
+                <input type="text" name="user" value="{{ form.user | default("") }}">
             </div>
-        {% endfor %}
+            <div>
+                <label for="user">Content:</label>
+                <textarea name="content">{{ form.content | default("") }}</textarea>
+            </div>
+            <div class="button">
+                <button type="submit">Submit comment</button>
+            </div>
+        </form>
+    </div>
+
+    <h2>Comments</h2>
+    <div class="comments">
+    {% for comment in post.comments %}
+        <div class="comment">
+            <div class="header">
+                <span class="user"> by {{ comment.user }}</span>
+                <span class="date"> at {{ comment.created_at | datetime }}</span>
+            </div>
+
+            <p class="body">
+                {{ comment.content | newline_to_br }}
+            </p>
         </div>
+    {% else %}
+        No comments so far
+    {% endfor %}
     </div>
 {% endblock %}
