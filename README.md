@@ -5,7 +5,7 @@ This is a demo project intended to show how to implement custom storage solution
 ## Introduction
 
 Blabber is a simplistic web application that allows users to submit posts and add comments to those posts.
-The front page of Blabber shows only the most recent posts. Ever post has its own page, where only the most recent
+The front page of Blabber shows only the most recent posts. Every post has its own page, where the most recent
 comments are displayed.
 
 *Please note that no effort whatsoever has been made to secure this application. Do not run it in a public environment.*
@@ -36,23 +36,30 @@ The prequel library is used to implement the custom object storage for the web a
     and are not indexed. The list is a simple data structure: a chain of blocks linked together by pointers, each block
     containing comment objects. Comments to not have an id, they only store a user name, content and a creation timestamp.
 
-    In a real application, comments would likely be implemented with their own IDs and with a single, large btree for all
-    comments (like an SQL table with foreign keys to match them to their posts), but I chose a linked list to showcase
+    In a real application, comments would likely be implemented with their own ids and with a single, large btree for all
+    comments (like an SQL table with foreign keys to match them to their posts), but this project uses a linked list to showcase
     nested data structures.
-
-The classes responsible for the storage system can be found in `src/storage.hpp` and `src/storage.cpp`. The source code `src/database.cpp`
-is responsible for opening files, starting and ending database transactions and exposing the interface to Python.
 
 The database back end supports transactions (atomic and durable) via the `transaction_engine`. Transactions are implemented
 using a write ahead journal file placed next to the database file on disk. The content of the journal file is merged back to the
 database in "checkpoint" operations when the journal becomes too large (> 1 MB right now) or on (clean) application shutdown.
 As of right now, prequel does not support multiple concurrent threads, so the database plugin serializes all incoming transactions.
 
+The classes responsible for the storage system can be found in `src/storage.hpp` and `src/storage.cpp`. The source code `src/database.cpp`
+is responsible for opening files, starting and ending database transactions and exposing the interface to Python.
+
+
 ## Building
 
-You must compile the native database module before you can launch the python application.
+### Python
+
+You need a recent version of Python (3.6+) in order to build and run this project.
+Consider using a [virtual Python environment](https://docs.python.org/3.6/tutorial/venv.html)
+for this project.
 
 ### Required system dependencies
+
+You must compile the native database module before you can launch the python application.
 
 - A recent Python interpreter (3.6+) and Python header files
 - Boost header files (Note: boost will probably be eliminated as a dependency in the future)
@@ -81,23 +88,24 @@ On recent versions of Debian or Ubuntu, run as root:
 
 -   Copy the native module from the `build/src` directory
     next to `app.py` in the main directory.
-    Note that the concrete name of the module depends on platform,
+    Note that the concrete name of the module depends on your platform,
     it should start with `blabber_database`.
     Example:
 
     ```
-    $ cp src/blabber_database.cpython-37m-x86_64-linux-gnu.so ../..
+    $ cp src/blabber_database.cpython-36m-x86_64-linux-gnu.so ../..
     $ cd ../..
     ```
 
-## Running
+### Required Python libraries
 
-You need a recent version of Python (at least 3.6) to run this application. The dependencies are listed
-in the file `requirements.txt`, you can install them using pip (consider using a virtual Python environment):
+The dependencies are listed in the file `requirements.txt`, you can install them using pip:
 
 ```
 $ pip install -r requirements.txt
 ```
+
+## Running
 
 You can start the application by executing `app.py`. The builtin HTTP server will listen on port 8080:
 
